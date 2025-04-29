@@ -14,3 +14,73 @@ Alternative ideas:
     - Gimmick: Adding a quesiton of the week and you pick a side for the week. Compare likes so theres a winning side
         - this is just normal social media with controversy baked into it for fun teehee
 
+4/29
+Marian, Javier
+Static Folder:
+    - JS
+        * please use for all scripting
+    - CSS
+        * keep one main css for consistency
+        * consider adding css files per person to test features
+        *dicuss color pallete/theme
+Templates:
+    - login.HTML
+    - profile.HTML
+    - profileEditing.HTML (change bio, pfp, etc.)
+    - mainfeed.HTML
+    - upload.HTML
+    - search.HTML 
+    - index.HTML in admin template
+Python
+    - app.py (main)
+    - database.py
+    - rest.py
+Task delegation (TO DO) (in order):
+    - design a database
+    - set up flask admin
+    - develop html basic pages/skeletons
+    - Basic REST features
+    - javascripting
+    - css
+    - deployment (PythonAnywhere?)
+
+To Discuss:
+    - all features
+        * password recovery
+    - gimmicks
+        * trivia
+    - theme
+    - color palletes
+    - layout
+
+DataBase Base Design:
+    Entity Tables:
+    - User
+        * user id (primary) (Int)
+        * user name (string)
+        * password (string)
+        * pfp 
+        * bio (string)
+        * Security Question (string)
+        * Security Answer (string)
+    - Post
+        * Post ID (primary) (Int)
+        * image 
+        * text (string)
+        * dateTime (dateTime datatype)
+        
+Junction/Relationship Tables:
+    - Interaction
+        * Interaction ID (primary) (Int)
+        * User ID (doing the interation) (Foreign)
+        * Post ID (Foreign) 
+        * Interaction Type (like or comment?) (Boolean)
+        * Extra Info (insert comment here) (string)
+    - Follow 
+        * Follow ID (primary)(Int)
+        * user1 (Foreign)
+        * user2 (Foreign)
+    - User --> Post Table: (One to Many)
+        * UserPost ID (primary) (Int)
+        * UserId (Foreign)
+        * PostId (Foreign)
