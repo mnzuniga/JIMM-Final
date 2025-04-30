@@ -87,4 +87,13 @@ Junction/Relationship Tables:
 
 
 in fronted Folder
+npm install axios
 npm install react-router-dom
+optional: npm install react-bootstrap bootstrap
+
+in backend Folder
+pip install Flask-SQLAlchemy
+pip install Werkzeug #password hashing
+pip install Flask-Mail #for sending recovery emails
+pip install Flask-Cors
+
