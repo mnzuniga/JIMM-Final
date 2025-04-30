@@ -84,3 +84,7 @@ Junction/Relationship Tables:
         * UserPost ID (primary) (Int)
         * UserId (Foreign)
         * PostId (Foreign)
+
+
+in fronted Folder
+npm install react-router-dom

@@ -1,29 +1,17 @@
-from app import db
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 
-class User(db.Model):
+db = SQLAlchemy()
+
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    bio = db.Column(db.String(300))
-    pfp = db.Column(db.String(300))
-    security_question = db.Column(db.String(200))
-    security_answer = db.Column(db.String(200))
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    posts = db.relationship('Post', backref='author', lazy=True)
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    image = db.Column(db.String(300))
-    text = db.Column(db.String(300))
-    datetime = db.Column(db.DateTime)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-class Interaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
-    type = db.Column(db.Boolean)  # like or comment
-    extra = db.Column(db.String(300))
-
-class Follow(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user1 = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user2 = db.Column(db.Integer, db.ForeignKey('user.id'))
+    content = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.String(200), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

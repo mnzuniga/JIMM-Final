@@ -1,35 +1,211 @@
-/* all styling. consider making several css filess */
-.login-container {
-    max-width: 400px;
-    margin: 0 auto;
-    background-color: #fffaf5;
-    padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+/* all styling. consider making several css files */
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+}
+
+body {
+  background-color: #f8f9fa; /* light background */
+  color: #333;
+  font-size: 16px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header Styles */
+h1, h2, h3, h4 {
+  font-family: 'Pacifico', cursive;  /* A playful, pet-friendly font */
+  color: #ffcc00;  /* Yellow color */
+  text-align: center;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Navbar Styles */
+nav {
+  background-color: #ffcc00; /* Yellow background for the navbar */
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+}
+
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a {
+  color: #fff;  /* White text */
+  font-weight: bold;
+  font-size: 18px;
+}
+
+nav ul li a:hover {
+  color: #ff9933; /* Hover effect with a darker yellow */
+}
+
+/* Container for main content */
+.container {
+  width: 80%;
+  margin: 20px auto;
+  flex-grow: 1;  /* Allow content to expand and fill space */
+  text-align: center;  /* Center all text */
+}
+
+/* Feed Styles */
+.feed-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+
+.feed-item {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.feed-item img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.feed-item .caption {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #555;
+}
+
+/* Profile Styles */
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #ffcc00;  /* Yellow background for avatar */
+  margin-bottom: 20px;
+}
+
+.profile-details h2 {
+  color: #ffcc00;  /* Yellow color for profile text */
+}
+
+/* Button Styles */
+button {
+  background-color: #ffcc00;  /* Yellow background for buttons */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #ff9933; /* Darker yellow on hover */
+}
+
+/* Input Styles */
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+  font-size: 16px;
+}
+
+textarea {
+  height: 150px;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
   }
-  
-  .login-form input {
-    display: block;
-    width: 100%;
-    margin: 0.5rem 0;
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+
+  nav {
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .login-form button {
-    background-color: #ff6f61;
-    color: white;
-    padding: 0.75rem;
-    width: 100%;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
+
+  nav ul {
+    flex-direction: column;
+    margin-top: 10px;
   }
-  
-  .login-form .error {
-    color: red;
-    font-size: 0.9rem;
+
+  nav ul li {
+    margin: 5px 0;
   }
-  
+}
+
+/* Basic styling for Forgot Password page */
+.forgot-password-container {
+  width: 80%;
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.forgot-password-container h2 {
+  color: #ffcc00; /* Yellow color for the heading */
+}
+
+.forgot-password-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.forgot-password-container button {
+  background-color: #ffcc00; /* Yellow button */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.forgot-password-container button:hover {
+  background-color: #ff9933; /* Darker yellow on hover */
+}

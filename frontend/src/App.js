@@ -10,6 +10,8 @@ import Discover from './components/Discover';
 import Login from './components/Login';
 import Register from './components/Register';
 import RecoverAccount from './components/RecoverAccount';
+import MainFeed from './components/MainFeed'; // Import MainFeed
+import ForgotPassword from './components/ForgotPassword'; // Import ForgotPassword
 
 import './styles/main.css';
 
@@ -18,7 +20,8 @@ function App() {
     <Router>
       <NavBar />
       <Routes>
-        <Route path="/" element={<Feed />} />
+        <Route path="/" element={<MainFeed />} /> {/* MainFeed as the default route */}
+        <Route path="/feed" element={<Feed />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/recover" element={<RecoverAccount />} />
@@ -27,6 +30,7 @@ function App() {
         <Route path="/upload" element={<UploadPost />} />
         <Route path="/search" element={<Search />} />
         <Route path="/discover" element={<Discover />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* ForgotPassword Route */}
       </Routes>
     </Router>
   );
