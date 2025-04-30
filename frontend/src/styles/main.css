@@ -1,1 +1,35 @@
 /* all styling. consider making several css filess */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: #fffaf5;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .login-form input {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  
+  .login-form button {
+    background-color: #ff6f61;
+    color: white;
+    padding: 0.75rem;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .login-form .error {
+    color: red;
+    font-size: 0.9rem;
+  }
+  

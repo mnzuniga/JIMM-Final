@@ -1,0 +1,42 @@
+import React, { useState } from 'react';
+
+function RecoverAccount() {
+  const [username, setUsername] = useState('');
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [step, setStep] = useState(1);
+
+  const handleCheckUser = async e => {
+    e.preventDefault();
+    // Simulate fetching security question
+    setQuestion("What is your pet's name?");
+    setStep(2);
+  };
+
+  const handleRecover = async e => {
+    e.preventDefault();
+    // Simulate verification
+    alert('Password reset link sent!');
+  };
+
+  return (
+    <div className="page">
+      <h2>Recover Account 🔐</h2>
+      {step === 1 && (
+        <form onSubmit={handleCheckUser}>
+          <input placeholder="Enter username" value={username} onChange={e => setUsername(e.target.value)} />
+          <button type="submit">Next</button>
+        </form>
+      )}
+      {step === 2 && (
+        <form onSubmit={handleRecover}>
+          <p>Security Question: {question}</p>
+          <input placeholder="Answer" value={answer} onChange={e => setAnswer(e.target.value)} />
+          <button type="submit">Recover</button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+export default RecoverAccount;
