@@ -1,8 +1,8 @@
-# All API routes here
 from flask import Blueprint, request, jsonify
 from models import User, Post, db
 from flask_login import login_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from utils import generate_reset_token, send_reset_email  # import utility functions for token generation and email sending
 
 # Create Blueprint for the API
 api_routes = Blueprint('api_routes', __name__)
@@ -47,3 +47,22 @@ def create_post():
     db.session.commit()
 
     return jsonify({"message": "Post created successfully!"}), 201
+
+# New Forgot Password Route
+@api_routes.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    email_or_phone = request.json.get('email')  # get email or phone number from request
+    
+    if not email_or_phone:
+        return jsonify({'message': 'Email or phone number is required'}), 400
+    
+    # Find user by email or phone (adjust this according to your model)
+    user = User.query.filter((User.email == email_or_phone) | (User.phone == email_or_phone)).first()
+    
+    if user:
+        # Generate reset token and send email/SMS (adjust for phone if necessary)
+        token = generate_reset_token(user.email)
+        send_reset_email(user.email, token)  # Modify to send SMS if needed
+        return jsonify({'message': 'A password reset link has been sent to your email.'}), 200
+    
+    return jsonify({'message': 'Email or phone number not found'}), 404
