@@ -1,0 +1,1 @@
+// JS for auth API calls (login, register, etc.)
