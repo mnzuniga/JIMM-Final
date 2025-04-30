@@ -97,3 +97,5 @@ pip install Werkzeug #password hashing
 pip install Flask-Mail #for sending recovery emails
 pip install Flask-Cors
 
+How to Run
+in the JIMM-Final folder do cd fronted then npm start. 
