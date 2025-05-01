@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';  // Import axios for HTTP requests
+// make the forget passwrd a security question instead 
 
 const ForgotPassword = () => {
   const [emailOrPhone, setEmailOrPhone] = useState('');
