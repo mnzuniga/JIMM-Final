@@ -99,3 +99,38 @@ pip install Flask-Cors
 
 How to Run
 in the JIMM-Final folder do cd fronted then npm start. 
+
+4/30 
+Task delegation (TO DO) (in order):
+    - design a database
+    - set up flask admin
+    - develop html basic pages/skeletons
+    - Basic REST features
+    - javascripting
+    - css
+    - deployment (PythonAnywhere?)
+
+
+Tasks: 
+Javier:
+    - Frontend:
+        - mainfeed.HTML
+        - profile.HTML
+        - profileEditing.HTML (change bio, pfp, etc.)
+
+Ishita:
+    - search.HTML 
+    - index.HTML in admin template - search flask tutorial on how to do it >:)
+    - upload.HTML
+
+Shared Task: Javier works on the design of the login page and Ishita works on functionality of the buttons (javscripting) 
+-----------------------------------------------------------------------------------------------------------------
+
+Marian:
+   -Backend:
+        - rest.py - all the login, uploading,  (asking Javier to work on it as well)  
+Mabel: 
+    -Backend:
+         - app.py (main) + database.py - main work setting up allt the tables, flask admin
+
+Shared Tasks: REST API : rest.py,  (possible final boss)
