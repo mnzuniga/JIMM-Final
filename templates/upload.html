@@ -1,1 +1,37 @@
 <!-- creating a post -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Pet Post</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/upload.css') }}">
+</head>
+<body>
+    <div class="upload-container">
+        <h2>Share a Pet Moment 🐾</h2>
+        <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="photo">Upload Photo:</label>
+                <input type="file" name="photo" id="photo" accept="image/*" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea name="description" id="description" placeholder="What's happening?" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="tags">Tags (e.g., dog, cat, funny):</label>
+                <input type="text" name="tags" id="tags" placeholder="Enter tags separated by commas">
+            </div>
+
+            <div class="form-group">
+                <label for="link">Related Link (optional):</label>
+                <input type="url" name="link" id="link" placeholder="e.g. https://chewtoys.com/product123">
+            </div>
+
+            <button type="submit">Post</button>
+        </form>
+    </div>
+</body>
+</html>

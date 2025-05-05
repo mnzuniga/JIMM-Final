@@ -1,7 +1,7 @@
 import jwt
 from datetime import datetime, timedelta
 from flask_mail import Message
-from app import mail  # Assuming you have Flask-Mail set up
+from extensions import mail  # Import mail from extensions.py
 from config import SECRET_KEY  # Ensure SECRET_KEY is in your config
 
 # Function to generate the reset token
