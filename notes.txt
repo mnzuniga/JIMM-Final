@@ -134,3 +134,19 @@ Mabel:
          - app.py (main) + database.py - main work setting up allt the tables, flask admin
 
 Shared Tasks: REST API : rest.py,  (possible final boss)
+
+
+5/8
+Gimmicks to work on: Polls, trivia
+
+Database design:
+DataBase Base Design:
+    Entity Tables:
+    - User (user id, username, password, pfp, bio, security question, secutiry answer)
+    - Post (post id, image, text, date/time)
+    - Polls (poll id, question, option 1, option 2, start date)
+        
+Junction/Relationship Tables:
+    - Interaction (interaction id, user  id, post id, interaction type, extra info)
+    - Follow (follow id, user 1, user 2)
+    - User Post Table: (user post id, user id, post id)
