@@ -1,0 +1,51 @@
+.header {
+    padding: 20px;
+    text-align: center;
+    background: paleturquoise; /*FIGURE OUT THEMING*/
+    color: black; /*THEMING PLZ*/
+  }
+
+  .navbar {
+    overflow: hidden;
+    background-color: darkslategray;
+  }
+
+  .navbar button {
+    float: left;
+    display: block;
+    background-color: darkslategray;
+    color: white;
+    text-align: center;
+    padding: 14px 50px;
+    text-decoration: none;
+  }
+  /* Right-aligned link */
+  .navbar button.right {
+    float: right;
+  }
+  .navbar button:hover {
+    background-color: #ddd;
+    color: black;
+  }
+
+  .mainbox {
+    margin: 30px auto;
+    padding: 30px;
+    width: 85%;
+    border: 2px solid green;
+    background-color: var(--mainbox-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.innerbox {
+    margin: auto;
+    background-color: var(--innerbox-color);
+    width: 80%;
+    border: 2px solid paleturquoise;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+}
+

@@ -1,1 +1,40 @@
 <!-- log in page! -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="../static/styles/login.css">
+</head>
+
+<body>
+    <div class="header">  
+        <h1> PetSite </h1>
+    </div>
+
+    <div class="navbar">
+        <button onclick="sampleRedirect">Main Feed</button> <!-- # is where a link would go!! -->
+        <button onclick="sampleRedirect">Search</button>
+        <button onclick="sampleRedirect">Upload</button>
+        <button onclick="sampleRedirect" class="right">My Profile</button>
+      </div>
+
+      <div class="mainbox">
+        <div class="innerbox">
+                <label for="inputusername">Username:</label>
+                <input type="text" id="inputusername" name="inputusername" required>
+                <br><br>
+                <label for="inputpassword">Password:</label>
+                <input type="password" id="inputpassword" name="inputpassword" required>
+                <br><br>
+                <button type="submit">Sign In</button>
+            </div>
+            </div>
+
+      <script>
+        function sampleRedirect() {
+          document.getElementById("demo").innerHTML = "Redirect properly LATER :)";
+        }
+        </script>
+</body>
+</html>
