@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from models import User, Post, db
+from models import User, Post
+from extensions import db
 from flask_login import login_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils import generate_reset_token, send_reset_email  # import utility functions for token generation and email sending
@@ -49,6 +50,7 @@ def create_post():
     return jsonify({"message": "Post created successfully!"}), 201
 
 # New Forgot Password Route
+# please check logic and if this is possible, remain realistic 
 @api_routes.route('/api/forgot-password', methods=['POST'])
 def forgot_password():
     email_or_phone = request.json.get('email')  # get email or phone number from request

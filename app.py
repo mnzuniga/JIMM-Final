@@ -3,20 +3,24 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import os
 
-from extensions import db, login_manager, mail
+from extensions import db, login_manager, mail, admin
 from models import User, Post  # Make sure these models exist
 from rest import api_routes  # Ensure rest.py doesn't import app.py to avoid circular import
+from config import SECRET_KEY, SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+from flask_admin.contrib.sqla import ModelView
+from werkzeug.security import check_password_hash
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = 'your_secret_key_here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')  # Make sure this folder exists
 
 # Flask-Mail config
+# i dont think we can email :(
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -29,6 +33,7 @@ db.init_app(app)
 login_manager.init_app(app)
 mail.init_app(app)
 login_manager.login_view = 'login'  # Replace with your login route name
+admin.init_app(app)
 
 # Register REST API routes (blueprint)
 app.register_blueprint(api_routes)
@@ -38,9 +43,26 @@ with app.app_context():
     db.create_all()
 
 # Home route (Admin dashboard or landing)
-@app.route('/')
-def index():
-    return render_template('admin/index.html')
+#@app.route('/')
+#def index():
+#    return render_template('admin/index.html')
+# this is not how admin works :pensive:
+
+
+# simple log in
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = User.query.filter_by(email=email).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html', error="Invalid")
+    
+    return render_template('login.html')
 
 # Upload post/photo route
 @app.route('/upload', methods=['GET', 'POST'])
