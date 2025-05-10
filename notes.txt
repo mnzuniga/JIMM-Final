@@ -150,3 +150,26 @@ Junction/Relationship Tables:
     - Interaction (interaction id, user  id, post id, interaction type, extra info)
     - Follow (follow id, user 1, user 2)
     - User Post Table: (user post id, user id, post id)
+
+5/9 - Javier, Ishita
+- css talk
+    - palette chosen and css doc created
+    - fonts chosen
+        - Monaco
+            -Default font
+
+- html
+    - register page seperate from login for account creation
+        - javi's job lol
+    - make a html page for polls/trivia (polls.html?)
+    - 
+
+Site Name ideas: (Temp name Petsite)
+- Pawfectly
+- Fur Real Tho
+- Creature Feature
+    - (featuring... the creature)
+
+
+Notes on what to do before i forget:
+- (Jav) make navigation bar on login page sticky 
