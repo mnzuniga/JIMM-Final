@@ -1,4 +1,7 @@
-from flask import Flask
+Hi
+
+
+from flask import Flask, render_template, request, redirect, url_for
 from flask_login import LoginManager
 from config import Config
 from database import init_app as db_init, db
@@ -9,7 +12,6 @@ from flask_admin.contrib.sqla import ModelView
 from utils import hash_password
 
 
-# need to put it here to fix bug??
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 
@@ -25,18 +27,38 @@ def create_app():
     login_manager.init_app(app)
     admin.init_app(app)
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
-
     register_routes(app)
 
-    # admin function
+    # Admin views
     admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(Post, db.session))
     admin.add_view(ModelView(Poll, db.session))
     admin.add_view(ModelView(Interaction, db.session))
     admin.add_view(ModelView(Follow, db.session))
+
+    # Login and Register HTML routes
+
+    @app.route('/', methods=['GET', 'POST'])
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            # Placeholder: Get form data and authenticate
+            username = request.form['username']
+            password = request.form['password']
+            # TODO: Authenticate with Flask-Login
+            return f"Login attempted for: {username}"
+        return render_template('login.html')
+
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
+        if request.method == 'POST':
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+            name = request.form['name']
+            # TODO: Save user to database and hash password
+            return f"Registered user: {username} ({email})"
+        return render_template('register.html')
 
     return app
 
