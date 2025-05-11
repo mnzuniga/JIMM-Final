@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, redirect, url_for
 from flask_login import LoginManager
 from config import Config
@@ -9,9 +8,8 @@ from rest import init_app as register_routes
 from flask_admin.contrib.sqla import ModelView
 from utils import hash_password
 
-
 login_manager = LoginManager()
-login_manager.login_view = 'login'
+login_manager.login_view = 'login_view'  # changed from 'login' to 'login_view'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -38,25 +36,24 @@ def create_app():
 
     @app.route('/', methods=['GET', 'POST'])
     @app.route('/login', methods=['GET', 'POST'])
-    def login():
+    def login_view():  # renamed from 'login' to 'login_view'
         if request.method == 'POST':
-            # Placeholder: Get form data and authenticate
             username = request.form['username']
             password = request.form['password']
             # TODO: Authenticate with Flask-Login
             return f"Login attempted for: {username}"
         return render_template('login.html')
 
-    @app.route('/register', methods=['GET', 'POST'])
-    def register():
-        if request.method == 'POST':
-            username = request.form['username']
-            email = request.form['email']
-            password = request.form['password']
-            name = request.form['name']
-            # TODO: Save user to database and hash password
-            return f"Registered user: {username} ({email})"
-        return render_template('register.html')
+        @app.route('/register', methods=['GET', 'POST'])
+        def register_view():              # ← renamed from register()
+            if request.method == 'POST':
+                username = request.form['username']
+                email    = request.form['email']
+                password = request.form['password']
+                name     = request.form['name']
+                # TODO: Save user to database and hash password
+                return f"Registered user: {username} ({email})"
+            return render_template('register.html')
 
     return app
 
@@ -64,4 +61,3 @@ app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)
-
