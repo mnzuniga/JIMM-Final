@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Polls</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/polls.css') }}">
+</head>
+<body>
+    <h1>Current Polls</h1>
+    {% for poll in polls %}
+    <div class="poll-card">
+        <h2>{{ poll.question }}</h2>
+        <form method="POST" action="{{ url_for('polls') }}">
+            <input type="hidden" name="poll_id" value="{{ poll.id }}">
+            <button type="submit" name="option" value="1">{{ poll.option1 }}</button>
+            <button type="submit" name="option" value="2">{{ poll.option2 }}</button>
+        </form>
+        <p>Votes: {{ poll.votes1 }} vs {{ poll.votes2 }}</p>
+    </div>
+    {% endfor %}
+</body>
+</html>
