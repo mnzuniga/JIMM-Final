@@ -9,7 +9,7 @@ from flask_admin.contrib.sqla import ModelView
 from utils import hash_password
 
 login_manager = LoginManager()
-login_manager.login_view = 'login_view'  # changed from 'login' to 'login_view'
+login_manager.login_view = 'login_view'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -32,32 +32,30 @@ def create_app():
     admin.add_view(ModelView(Interaction, db.session))
     admin.add_view(ModelView(Follow, db.session))
 
-    # Login and Register HTML routes
-
+    # Login route
     @app.route('/', methods=['GET', 'POST'])
     @app.route('/login', methods=['GET', 'POST'])
-    def login_view():  # renamed from 'login' to 'login_view'
+    def login_view():
         if request.method == 'POST':
             username = request.form['username']
             password = request.form['password']
-            # TODO: Authenticate with Flask-Login
             return f"Login attempted for: {username}"
         return render_template('login.html')
 
-        @app.route('/register', methods=['GET', 'POST'])
-        def register_view():              # ← renamed from register()
-            if request.method == 'POST':
-                username = request.form['username']
-                email    = request.form['email']
-                password = request.form['password']
-                name     = request.form['name']
-                # TODO: Save user to database and hash password
-                return f"Registered user: {username} ({email})"
-            return render_template('register.html')
+    # Register route
+    @app.route('/register', methods=['GET', 'POST'])
+    def register_view():
+        if request.method == 'POST':
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+            name = request.form['name']
+            return f"Registered user: {username} ({email})"
+        return render_template('register.html')
 
-    return app
+    return app  # make sure this is indented properly and ends create_app()
 
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
