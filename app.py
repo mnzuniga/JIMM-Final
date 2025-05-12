@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from config import Config
 from database import init_app as db_init, db
-from extensions import login_manager, admin # Using these instances directly
+from extensions import login_manager, admin, SecureModelView
 from models import User, Post, Poll, Interaction, Follow
 from flask_admin.contrib.sqla import ModelView
 from utils import hash_password, verify_password, allowed_file
@@ -17,7 +17,8 @@ import uuid # For unique filenames
 # However, best practice is often within create_app or an extensions setup function.
 # For this fix, we'll ensure it's set correctly.
 # login_manager.login_view = 'login_view' # Will be set in create_app after init
-
+class PollAdmin(SecureModelView):
+    form_excluded_columns = ('interactions',)
 @login_manager.user_loader # Uses the login_manager instance from extensions
 def load_user(user_id):
     try:
@@ -40,11 +41,7 @@ def create_app():
     admin.init_app(app)
 
     # Admin views
-    admin.add_view(ModelView(User, db.session))
-    admin.add_view(ModelView(Post, db.session))
-    admin.add_view(ModelView(Poll, db.session))
-    admin.add_view(ModelView(Interaction, db.session))
-    admin.add_view(ModelView(Follow, db.session))
+    admin.add_view(PollAdmin(Poll, db.session, name='Polls'))
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
@@ -65,6 +62,8 @@ def create_app():
             user = User.query.filter_by(username=username).first()
             if user and verify_password(user.password, password):
                 login_user(user)
+                if user.is_admin:
+                    return redirect(url_for('admin.index'))
                 return redirect(url_for('main_feed'))
             flash('Invalid credentials', 'warning')
             return render_template('login.html')
@@ -407,5 +406,20 @@ app = create_app()
 if __name__ == '__main__':
     with app.app_context():
         db.create_all() # For development only. Use migrations (e.g., Flask-Migrate) for production.
-    # WARNING: debug=True is insecure and should NOT be used in a production environment.
+        # WARNING: debug=True is insecure and should NOT be used in a production environment.
+        if __name__ == '__main__':
+
+            if not User.query.filter_by(username='admin').first():
+                admin_user = User(
+                    username='admin',
+                    password=hash_password('jimmfinal'),
+                    security_question="whos your favorite professor?",
+                    security_answer='hepworth',
+                    is_admin=True
+                )
+                db.session.add(admin_user)
+                db.session.commit()
+
+    app.run(debug=True, port=5001)
+
     app.run(debug=True, port=5001)
