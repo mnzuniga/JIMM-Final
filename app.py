@@ -1,28 +1,42 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+# from flask_login import LoginManager # Removed: No longer creating a new instance here, using one from extensions
+from flask_login import login_user, logout_user, login_required, current_user
 from config import Config
 from database import init_app as db_init, db
-from extensions import login_manager, admin
+from extensions import login_manager, admin # Using these instances directly
 from models import User, Post, Poll, Interaction, Follow
 from flask_admin.contrib.sqla import ModelView
 from utils import hash_password, verify_password, allowed_file
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
+import uuid # For unique filenames
 
-login_manager = LoginManager()
-login_manager.login_view = 'login_view'
+# Configure the login_manager instance imported from extensions
+# This is typically done after init_app, but can be set here if login_manager is already an instance.
+# However, best practice is often within create_app or an extensions setup function.
+# For this fix, we'll ensure it's set correctly.
+# login_manager.login_view = 'login_view' # Will be set in create_app after init
 
-@login_manager.user_loader
+@login_manager.user_loader # Uses the login_manager instance from extensions
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    try:
+        return User.query.get(int(user_id))
+    except (ValueError, TypeError): # Handle cases where user_id might not be a valid int string
+        return None
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Ensure UPLOAD_FOLDER exists - moved here to ensure app.config is loaded
+    # and it's done once per app creation.
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
     db_init(app)
-    login_manager.init_app(app)
+    login_manager.init_app(app) # Initialize the instance from extensions
+    login_manager.login_view = 'login_view' # Set login_view after init_app
     admin.init_app(app)
 
     # Admin views
@@ -32,97 +46,145 @@ def create_app():
     admin.add_view(ModelView(Interaction, db.session))
     admin.add_view(ModelView(Follow, db.session))
 
-    # Login route
     @app.route('/', methods=['GET', 'POST'])
+    def index():
+        if current_user.is_authenticated:
+            return redirect(url_for('main_feed'))
+        return redirect(url_for('login_view'))
+
     @app.route('/login', methods=['GET', 'POST'])
     def login_view():
+        if current_user.is_authenticated:
+            return redirect(url_for('main_feed'))
         if request.method == 'POST':
-            username = request.form['username']
-            password = request.form['password']
-            # added by marian
+            username = request.form.get('username')
+            password = request.form.get('password')
+            if not username or not password:
+                flash('Username and password are required.', 'warning')
+                return render_template('login.html')
             user = User.query.filter_by(username=username).first()
             if user and verify_password(user.password, password):
                 login_user(user)
                 return redirect(url_for('main_feed'))
-            flash('Invalid credentials', '!!!')
-            # end
-            return f"Login attempted for: {username}"
+            flash('Invalid credentials', 'warning')
+            return render_template('login.html')
         return render_template('login.html')
 
-    # Register route
     @app.route('/register', methods=['GET', 'POST'])
     def register_view():
+        if current_user.is_authenticated:
+            return redirect(url_for('main_feed'))
         if request.method == 'POST':
-            username = request.form['username']
-            password = request.form['password']
-            name = request.form['name']
+            username = request.form.get('username')
+            password = request.form.get('password')
+            name = request.form.get('name', username) # Default name to username
+
+            if not username or not password:
+                flash('Username and password are required.', 'warning')
+                return render_template('register.html')
+            
+            # Add more validation if desired (e.g., password complexity, username format)
+
             if User.query.filter_by(username=username).first():
                 flash('Username already taken', 'warning')
             else:
-                user = User(username=username,password=hash_password(password),   )
+                user = User(username=username, password=hash_password(password), name=name)
                 db.session.add(user)
                 db.session.commit()
-                flash('Account created!', 'success')
-                return redirect(url_for('login'))
-            return f"Registered user: {username} ({email})"
+                flash('Account created! Please login.', 'success')
+                return redirect(url_for('login_view'))
+            return render_template('register.html')
         return render_template('register.html')
-    
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True) # for images
 
-    @app.route('/feed')
+    @app.route('/main_feed')
     @login_required
     def main_feed():
-        posts = Post.query.order_by(Post.date_time.desc()).all()
-        return render_template('mainfeed.html', posts=posts)
+        page = request.args.get('page', 1, type=int)
+        per_page = app.config.get('POSTS_PER_PAGE', 10)
+        pagination = Post.query.order_by(Post.date_time.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        posts = pagination.items
+        return render_template('mainfeed.html', posts=posts, pagination=pagination)
 
-    # call when logging out
     @app.route('/logout')
     @login_required
     def logout_view():
         logout_user()
+        flash('You have been logged out.', 'info')
         return redirect(url_for('login_view'))
 
-    # access all ur stuff, feel free to change the request forms. Also check out if you have a request file
     @app.route('/edit_profile', methods=['GET', 'POST'])
     @login_required
     def edit_profile():
         if request.method == 'POST':
-            bio = request.form.get('bio')
+            bio = request.form.get('bio', '') # Default to empty string
             current_user.bio = bio
+            
             file = request.files.get('photo')
-            if file and allowed_file(file.filename):
-                fn = secure_filename(file.filename)
-                path = os.path.join(app.config['UPLOAD_FOLDER'], fn)
-                file.save(path)
-                current_user.pfp = fn
+            if file and file.filename: # Check if a file was actually selected
+                if allowed_file(file.filename):
+                    original_filename = secure_filename(file.filename)
+                    ext = os.path.splitext(original_filename)[1].lower() # Ensure consistent extension case
+                    unique_filename = str(uuid.uuid4()) + ext
+                    path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    try:
+                        file.save(path)
+                        # Optional: remove old pfp if it exists and is different
+                        # if current_user.pfp and current_user.pfp != unique_filename:
+                        #     old_pfp_path = os.path.join(app.config['UPLOAD_FOLDER'], current_user.pfp)
+                        #     if os.path.exists(old_pfp_path):
+                        #         try:
+                        #             os.remove(old_pfp_path)
+                        #         except OSError as e:
+                        #             app.logger.error(f"Error deleting old pfp: {e}")
+                        current_user.pfp = unique_filename
+                    except Exception as e:
+                        app.logger.error(f"Failed to save profile picture: {e}")
+                        flash('Failed to save profile picture due to a server error.', 'danger')
+                else:
+                    flash('Invalid file type for photo. Please upload an allowed image format.', 'warning')
+            
             db.session.commit()
             flash('Profile updated!', 'success')
             return redirect(url_for('profile', username=current_user.username))
-        return render_template('editprofile.html')
+        return render_template('editprofile.html', user=current_user)
 
-    #shows a profile given a username. pls provide
+
     @app.route('/profile/<username>')
     @login_required
     def profile(username):
         user = User.query.filter_by(username=username).first_or_404()
-        posts = user.posts
-        return render_template('profile.html', user=user, posts=posts)
+        page = request.args.get('page', 1, type=int)
+        per_page = app.config.get('POSTS_PER_PROFILE_PAGE', 9)
+        pagination = Post.query.with_parent(user, 'authors').order_by(Post.date_time.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        posts_on_page = pagination.items
+        return render_template('profile.html', user=user, posts=posts_on_page, pagination=pagination)
 
-
-    # for uploading. this is a file request
     @app.route('/upload', methods=['GET', 'POST'])
     @login_required
     def upload():
         if request.method == 'POST':
             file = request.files.get('photo')
-            if not (file and allowed_file(file.filename)):
-                flash('Please upload an image.', 'warning')
+            text = request.form.get('description', '')
+
+            if not file or not file.filename:
+                flash('Please select an image file to upload.', 'warning')
                 return redirect(request.url)
-            fn = secure_filename(file.filename)
-            save_path = os.path.join(app.config['UPLOAD_FOLDER'], fn)
-            file.save(save_path)
-            text = request.form.get('description') or ''
-            post = Post(image=fn, text=text)
+            if not allowed_file(file.filename):
+                flash('Invalid file type. Please upload an image.', 'warning')
+                return redirect(request.url)
+
+            original_filename = secure_filename(file.filename)
+            ext = os.path.splitext(original_filename)[1].lower()
+            unique_filename = str(uuid.uuid4()) + ext
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            try:
+                file.save(save_path)
+            except Exception as e:
+                app.logger.error(f"Failed to save uploaded image: {e}")
+                flash('Failed to save image due to a server error.', 'danger')
+                return redirect(request.url)
+
+            post = Post(image=unique_filename, text=text, date_time=datetime.utcnow())
             post.authors.append(current_user)
             db.session.add(post)
             db.session.commit()
@@ -130,139 +192,191 @@ def create_app():
             return redirect(url_for('main_feed'))
         return render_template('upload.html')
 
-    # searches users :3
     @app.route('/search', methods=['GET'])
     @login_required
     def search():
-        query = request.args.get('query', '')
+        query = request.args.get('query', '').strip()
         results = []
+        pagination = None
         if query:
-            results = User.query.filter(User.username.ilike(f'%{query}%')).all()
-        return render_template('search.html', results=results)
-    
-    # should handle poll choice and poll results
+            page = request.args.get('page', 1, type=int)
+            per_page = app.config.get('SEARCH_RESULTS_PER_PAGE', 10)
+            pagination = User.query.filter(User.username.ilike(f'%{query}%')).paginate(page=page, per_page=per_page, error_out=False)
+            results = pagination.items
+        return render_template('search.html', results=results, query=query, pagination=pagination)
+
     @app.route('/polls', methods=['GET', 'POST'])
     @login_required
     def polls():
         poll = Poll.query.order_by(Poll.start_date.desc()).first()
-        if not poll:
-            flash('No polls available.', 'info')
-            return redirect(url_for('main_feed'))
         
-        # feel free to change form request name
-        if request.method == 'POST':
-            choice = request.form.get('choice')
-            vote = Interaction(user_id=current_user.id, poll_id=poll.id, interaction_type='vote', extra_info=choice)
-            db.session.add(vote)
-            db.session.commit()
-            flash('Choice saved!', 'success')
+        if not poll:
+            flash('No polls available at the moment.', 'info')
             return redirect(url_for('main_feed'))
 
-        # count
-        votes1 = Interaction.query.filter_by(poll_id=poll.id, interaction_type='vote', extra_info='1').count()
-        votes2 = Interaction.query.filter_by(poll_id=poll.id, interaction_type='vote', extra_info='2').count()
-        return render_template('polls.html', poll=poll, votes1=votes1, votes2=votes2
-        )
+        user_vote = Interaction.query.filter_by(
+            user_id=current_user.id,
+            poll_id=poll.id,
+            interaction_type='vote'
+        ).first()
 
+        if request.method == 'POST':
+            if user_vote:
+                flash('You have already voted on this poll.', 'warning')
+                return redirect(url_for('polls'))
 
-    return app  # make sure this is indented properly and ends create_app()
+            choice = request.form.get('choice')
+            
+            # Validate choice. Assuming poll options are '1' and '2' for now based on vote counting.
+            # Ideally, these choices ('1', '2') would come from poll.option1_value, poll.option2_value or similar.
+            expected_choices = ['1', '2'] 
+            if choice not in expected_choices:
+                flash('Invalid choice submitted.', 'warning')
+                return redirect(url_for('polls'))
+
+            new_vote = Interaction(user_id=current_user.id, poll_id=poll.id, interaction_type='vote', extra_info=choice)
+            db.session.add(new_vote)
+            db.session.commit()
+            user_vote = new_vote # Update user_vote status for the template
+            flash('Your vote has been recorded!', 'success')
+            return redirect(url_for('polls')) # Redirect to see updated results
+
+        # Calculate votes. Consider efficiency for very popular polls (e.g., caching).
+        # This assumes Poll model has option1 (text for display) and option2 (text for display)
+        # And the values submitted are '1' and '2' corresponding to these options.
+        votes = {
+            '1': Interaction.query.filter_by(poll_id=poll.id, interaction_type='vote', extra_info='1').count(),
+            '2': Interaction.query.filter_by(poll_id=poll.id, interaction_type='vote', extra_info='2').count()
+        }
+        
+        return render_template('polls.html', poll=poll, votes=votes, user_vote=user_vote)
+
+    # API: Get all posts (for React feed)
+    @app.route('/api/posts', methods=['GET'])
+    @login_required
+    def api_get_posts():
+        posts = Post.query.order_by(Post.date_time.desc()).all()
+        result = []
+        for post in posts:
+            result.append({
+                'id': post.id,
+                'image': url_for('static', filename=f'uploads/{post.image}') if post.image else None,
+                'text': post.text,
+                'date_time': post.date_time.isoformat() if post.date_time else None,
+                'authors': [u.username for u in post.authors],
+                'likes': Interaction.query.filter_by(post_id=post.id, interaction_type='like').count(),
+                'comments': [i.extra_info for i in post.interactions if i.interaction_type == 'comment']
+            })
+        return {'posts': result}
+
+    # API: Like a post (toggle like/unlike)
+    @app.route('/api/posts/<int:post_id>/like', methods=['POST'])
+    @login_required
+    def api_like_post(post_id):
+        post = Post.query.get_or_404(post_id)
+        existing = Interaction.query.filter_by(user_id=current_user.id, post_id=post_id, interaction_type='like').first()
+        if existing:
+            db.session.delete(existing)
+            db.session.commit()
+            like_count = Interaction.query.filter_by(post_id=post_id, interaction_type='like').count()
+            return {'success': True, 'liked': False, 'like_count': like_count}
+        like = Interaction(user_id=current_user.id, post_id=post_id, interaction_type='like')
+        db.session.add(like)
+        db.session.commit()
+        like_count = Interaction.query.filter_by(post_id=post_id, interaction_type='like').count()
+        return {'success': True, 'liked': True, 'like_count': like_count}
+
+    # API: Comment on a post
+    @app.route('/api/posts/<int:post_id>/comment', methods=['POST'])
+    @login_required
+    def api_comment_post(post_id):
+        post = Post.query.get_or_404(post_id)
+        comment = request.json.get('comment', '').strip()
+        if not comment:
+            return {'error': 'Comment required'}, 400
+        new_comment = Interaction(user_id=current_user.id, post_id=post_id, interaction_type='comment', extra_info=comment)
+        db.session.add(new_comment)
+        db.session.commit()
+        return {'success': True}
+
+    # API: Follow a user
+    @app.route('/api/follow/<username>', methods=['POST'])
+    @login_required
+    def api_follow_user(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        if user.id == current_user.id:
+            return {'error': 'Cannot follow yourself'}, 400
+        existing = Follow.query.filter_by(follower_id=current_user.id, followed_id=user.id).first()
+        if existing:
+            return {'error': 'Already following'}, 400
+        follow = Follow(follower_id=current_user.id, followed_id=user.id)
+        db.session.add(follow)
+        db.session.commit()
+        return {'success': True}
+
+    # API: Unfollow a user
+    @app.route('/api/unfollow/<username>', methods=['POST'])
+    @login_required
+    def api_unfollow_user(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        follow = Follow.query.filter_by(follower_id=current_user.id, followed_id=user.id).first()
+        if not follow:
+            return {'error': 'Not following'}, 400
+        db.session.delete(follow)
+        db.session.commit()
+        return {'success': True}
+
+    # IMPORTANT SECURITY NOTE: CSRF Protection
+    # This application appears to use raw HTML forms (`request.form`) without Flask-WTF or
+    # a similar CSRF protection mechanism. This makes POST endpoints vulnerable to
+    # Cross-Site Request Forgery (CSRF) attacks.
+    #
+    # To fix this, you should:
+    # 1. Integrate Flask-WTF (or another CSRF protection library).
+    #    - Install it: `pip install Flask-WTF`
+    #    - Add `WTF_CSRF_ENABLED = True` to your Flask `Config`.
+    #    - Ensure `SECRET_KEY` is set securely in `Config`.
+    # 2. Define forms using `FlaskForm` from `flask_wtf`.
+    # 3. In templates, include the CSRF token, e.g., `{{ form.hidden_tag() }}` or `{{ form.csrf_token }}`.
+    # 4. In your view functions, instantiate the form, pass it to the template,
+    #    and use `form.validate_on_submit()` to process form data and check CSRF token.
+    #
+    # Example (conceptual for login):
+    #
+    # forms.py:
+    # from flask_wtf import FlaskForm
+    # from wtforms import StringField, PasswordField, SubmitField
+    # from wtforms.validators import DataRequired
+    # class LoginForm(FlaskForm):
+    #     username = StringField('Username', validators=[DataRequired()])
+    #     password = PasswordField('Password', validators=[DataRequired()])
+    #     submit = SubmitField('Login')
+    #
+    # app.py (in login_view):
+    # from forms import LoginForm
+    # form = LoginForm()
+    # if form.validate_on_submit():
+    #     username = form.username.data
+    #     password = form.password.data
+    #     # ... rest of login logic
+    # return render_template('login.html', form=form)
+    #
+    # login.html (template):
+    # <form method="POST" action="{{ url_for('login_view') }}">
+    #   {{ form.hidden_tag() }}  <!-- or form.csrf_token -->
+    #   {{ form.username.label }} {{ form.username() }}
+    #   {{ form.password.label }} {{ form.password() }}
+    #   {{ form.submit() }}
+    # </form>
+    #
+    # This is a significant change and requires modifications to forms, templates, and view logic.
+
+    return app
 
 app = create_app()
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
-
-        initial_users = [
-            {'id': 1, 'username': 'marian', 'password': 'jimmfinal', 'is_admin': True},
-            {'id': 2, 'username': 'javier', 'password': 'jimmfinal', 'is_admin': False},
-            {'id': 3, 'username': 'mabel',  'password': 'jimmfinal', 'is_admin': False},
-            {'id': 4, 'username': 'ishita', 'password': 'jimmfinal', 'is_admin': False},
-        ]
-        for usern in initial_users:
-            if not User.query.get(usern['id']):
-                user = User(id=usern['id'],
-                    username=usern['username'],
-                    password=hash_password(usern['password']),
-                    pfp='happy.png',
-                    bio='',
-                    security_question="who's your favorite professor?",
-                    security_answer='hepworth',
-                    is_admin=usern['is_admin'])
-                db.session.add(user)
-
-        db.session.commit()
-
-        # initial post
-        javier = User.query.filter_by(username='javier').first()
-        if javier:
-            existing = Post.query.filter_by(text="wow! wouldn't it be cool if this was the first post?").first()
-            if not existing:
-                post = Post(
-                    image='happy.png',
-                    text="wow! wouldn't it be cool if this was the first post?",
-                    date_time=datetime.utcnow())
-                post.authors.append(javier)
-                db.session.add(post)
-                db.session.commit()
-            else:
-                post = existing
-
-            # likes
-            ishita = User.query.filter_by(username='ishita').first()
-            if ishita and not Interaction.query.filter_by(
-                    user_id=ishita.id,
-                    post_id=post.id,
-                    interaction_type='like').first():
-                like = Interaction(
-                    user_id=ishita.id,
-                    post_id=post.id,
-                    interaction_type='like',
-                    extra_info='')
-                db.session.add(like)
-                db.session.commit()
-
-        # initial poll
-        poll = Poll.query.filter_by(question="who's a better companion").first()
-        if not poll:
-            poll = Poll(
-                question="who's a better companion",
-                option1='dogs',
-                option2='cats',
-                start_date=datetime.utcnow())
-            db.session.add(poll)
-            db.session.commit()
-
-        # poll votes init
-        mapping = {
-            'javier': '2',
-            'ishita': '1',
-            'mabel':  '1',
-        }
-        for usename, choice in mapping.items():
-            user = User.query.filter_by(username=usename).first()
-            if user and not Interaction.query.filter_by(
-                    user_id=user.id,
-                    poll_id=poll.id,
-                    interaction_type='vote'
-                ).first():
-                vote = Interaction(
-                    user_id=user.id,
-                    poll_id=poll.id,
-                    interaction_type='vote',
-                    extra_info=choice
-                )
-                db.session.add(vote)
-        db.session.commit()
-
-        # follows
-        mabel = User.query.filter_by(username='mabel').first()
-        ishita = User.query.filter_by(username='ishita').first()
-        if mabel and ishita:
-            if not Follow.query.filter_by(follower_id=mabel.id, followed_id=ishita.id).first():
-                db.session.add(Follow(follower_id=mabel.id, followed_id=ishita.id))
-            if not Follow.query.filter_by(follower_id=ishita.id, followed_id=mabel.id).first():
-                db.session.add(Follow(follower_id=ishita.id, followed_id=mabel.id))
-        db.session.commit()
-
+        db.create_all() # For development only. Use migrations (e.g., Flask-Migrate) for production.
+    # WARNING: debug=True is insecure and should NOT be used in a production environment.
     app.run(debug=True, port=5001)
