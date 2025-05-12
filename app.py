@@ -115,35 +115,46 @@ def create_app():
     @login_required
     def edit_profile():
         if request.method == 'POST':
-            bio = request.form.get('bio', '') # Default to empty string
-            current_user.bio = bio
-            
-            file = request.files.get('photo')
-            if file and file.filename: # Check if a file was actually selected
+            # Change username
+            new_username = request.form.get('fname')
+            if new_username and new_username != current_user.username:
+                if User.query.filter_by(username=new_username).first():
+                    flash('Username already taken.', 'warning')
+                    return redirect(url_for('edit_profile'))
+                current_user.username = new_username
+                flash('Username updated!', 'success')
+
+            # Change password
+            new_password = request.form.get('password')
+            if new_password:
+                current_user.password = hash_password(new_password)
+                flash('Password updated!', 'success')
+
+            # Change bio
+            new_bio = request.form.get('bio')
+            if new_bio is not None:
+                current_user.bio = new_bio
+                flash('Bio updated!', 'success')
+
+            # Change profile picture
+            file = request.files.get('pfpUpload')
+            if file and file.filename:
                 if allowed_file(file.filename):
                     original_filename = secure_filename(file.filename)
-                    ext = os.path.splitext(original_filename)[1].lower() # Ensure consistent extension case
+                    ext = os.path.splitext(original_filename)[1].lower()
                     unique_filename = str(uuid.uuid4()) + ext
                     path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
                     try:
                         file.save(path)
-                        # Optional: remove old pfp if it exists and is different
-                        # if current_user.pfp and current_user.pfp != unique_filename:
-                        #     old_pfp_path = os.path.join(app.config['UPLOAD_FOLDER'], current_user.pfp)
-                        #     if os.path.exists(old_pfp_path):
-                        #         try:
-                        #             os.remove(old_pfp_path)
-                        #         except OSError as e:
-                        #             app.logger.error(f"Error deleting old pfp: {e}")
                         current_user.pfp = unique_filename
+                        flash('Profile picture updated!', 'success')
                     except Exception as e:
                         app.logger.error(f"Failed to save profile picture: {e}")
                         flash('Failed to save profile picture due to a server error.', 'danger')
                 else:
                     flash('Invalid file type for photo. Please upload an allowed image format.', 'warning')
-            
+
             db.session.commit()
-            flash('Profile updated!', 'success')
             return redirect(url_for('profile', username=current_user.username))
         return render_template('editprofile.html', user=current_user)
 

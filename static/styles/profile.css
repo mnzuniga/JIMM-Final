@@ -1,48 +1,50 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding-top: 60px; /* Space for navbar */
+}
+
 .profile {
-    background-color: #f5f5f5; /* replace with your themed("bgSoft") color */
-  }
-  
-  .profile .images {
-    width: 100%;
-    height: 300px;
-    position: relative;
-  }
-  
-  .profile .images .cover {
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden; /* Contains floated/absolutely positioned children */
+}
+
+.images {
+    position: relative; /* For positioning profilePic */
+    height: 250px; /* Adjust as needed */
+}
+
+.cover {
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-  
-  .profile .images .profilePic {
-    width: 200px;
-    height: 200px;
+}
+
+.profilePic {
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     object-fit: cover;
     position: absolute;
-    left: 0;
-    right: 0;
-    margin: auto;
-    top: 200px;
-  }
-  
-  .profile .profileContainer {
-    padding: 20px 70px;
-  }
-  
-  @media (max-width: 768px) {
-    .profile .profileContainer {
-      padding: 20px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .profile .profileContainer {
-      padding: 10px;
-    }
-  }
-  
-  .profile .uInfo {
+    bottom: -75px; /* Half of its height to hang off the cover */
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.profileContainer {
+    padding: 90px 20px 20px; /* Top padding to clear profilePic */
+    text-align: center;
+}
+
+.uInfo {
     height: 180px;
     box-shadow: 0px 0px 25px -10px rgba(0, 0, 0, 0.38);
     border-radius: 20px;
@@ -53,73 +55,206 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 20px;
-  }
-  
-  @media (max-width: 480px) {
-    .profile .uInfo {
-      flex-direction: column;
-      height: 30vh;
-      padding: 20px;
-      margin-top: 100px;
-    }
-  }
-  
-  .profile .uInfo .left {
+}
+
+.uInfo .center span {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #1c1e21;
+}
+
+.uInfo .info {
+    margin: 10px 0;
+    color: #606770;
+}
+
+.uInfo .info .item {
+    display: inline-flex; /* Align icon and text */
+    align-items: center;
+    margin: 0 10px;
+}
+
+.uInfo .info .item .material-icons {
+    margin-right: 5px;
+}
+
+.uInfo .center div[style*="margin-top:10px"] { /* Targeting the bio */
+    font-size: 1em;
+    color: #606770;
+    max-width: 600px;
+    margin: 15px auto !important; /* Override inline style for margin */
+}
+
+.uInfo .center a[href*="edit_profile"] {
+    background-color: #1877f2; /* Facebook blue, or your theme color */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.uInfo .center a[href*="edit_profile"]:hover {
+    background-color: #166fe5;
+}
+
+.uInfo .left {
     flex: 1;
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-  }
-  
-  .profile .uInfo .left a {
+}
+
+.uInfo .left a {
     color: #888; /* replace with themed("textColorSoft") */
-  }
-  
-  .profile .uInfo .center {
+}
+
+.uInfo .center {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-  }
-  
-  .profile .uInfo .center span {
-    font-size: 30px;
-    font-weight: 500;
-  }
-  
-  .profile .uInfo .center .info {
+}
+
+.uInfo .center .info {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-around;
-  }
-  
-  .profile .uInfo .center .info .item {
+}
+
+.uInfo .center .info .item {
     display: flex;
     align-items: center;
     gap: 5px;
     color: #888; /* themed("textColorSoft") */
-  }
-  
-  .profile .uInfo .center .info .item span {
+}
+
+.uInfo .center .info .item span {
     font-size: 12px;
-  }
-  
-  .profile .uInfo .center button {
+}
+
+.uInfo .center button {
     border: none;
     background-color: #5271ff;
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-  }
-  
-  .profile .uInfo .right {
+}
+
+.uInfo .right {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
-  }
-  
+}
+
+.posts {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #dddfe2;
+}
+
+.posts h2 {
+    font-size: 1.5em;
+    color: #1c1e21;
+    margin-bottom: 20px;
+}
+
+.posts > div[style*="display: flex"] { /* Targeting the posts container */
+    justify-content: center; /* Center posts if not enough to fill row */
+}
+
+.posts div[style*="background: #fff"] { /* Targeting post item */
+    width: calc(33.333% - 20px); /* Adjust for 3 posts per row, considering gap */
+    min-width: 200px; /* Minimum width for smaller screens */
+    margin-bottom: 20px; /* Add space between rows */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: box-shadow .3s cubic-bezier(.25,.8,.25,1);
+}
+
+.posts div[style*="background: #fff"]:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.posts img {
+    border-bottom: 1px solid #eee;
+}
+
+.comments strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.comments ul {
+    list-style-type: none;
+    padding-left: 0 !important; /* Override inline style */
+    margin-bottom: 10px;
+}
+
+.comments li {
+    background-color: #f0f2f5;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    font-size: 0.9em !important; /* Override inline style */
+}
+
+.comment-form input[type="text"] {
+    width: calc(100% - 70px) !important; /* Adjust width considering button */
+    padding: 8px !important;
+    border: 1px solid #dddfe2;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+.comment-form button {
+    padding: 8px 12px !important;
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.comment-form button:hover {
+    background-color: #166fe5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profilePic {
+        width: 120px;
+        height: 120px;
+        bottom: -60px;
+        border-width: 3px;
+    }
+    .profileContainer {
+        padding-top: 70px;
+    }
+    .posts div[style*="background: #fff"] { /* Post item */
+        width: calc(50% - 10px); /* 2 posts per row */
+    }
+}
+
+@media (max-width: 480px) {
+    .profileContainer {
+        padding: 10px;
+    }
+    .uInfo {
+        flex-direction: column;
+        height: 30vh;
+        padding: 20px;
+        margin-top: 100px;
+    }
+    .posts div[style*="background: #fff"] { /* Post item */
+        width: 100%; /* 1 post per row */
+    }
+}

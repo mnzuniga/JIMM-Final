@@ -4,81 +4,154 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Profile</title>
-    <link rel="stylesheet" href="../static/styles/1main.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/1main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/profile.css') }}"> <!-- Reuse profile styles for consistency -->
+    <style>
+        body {
+            padding-top: 70px; /* Adjust for navbar */
+        }
+        .navbar { /* Ensure navbar styles from 1main.css are applied or overridden */
+            position: fixed; /* Keep navbar at the top */
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .bg {
+            padding: 20px;
+            background-color: #f0f2f5; /* Consistent background */
+        }
+        .card {
+            background-color: #fff;
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card h1 {
+            font-size: 1.8em;
+            color: #1c1e21;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #dddfe2;
+            padding-bottom: 15px;
+        }
+        .microcard {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+        .microcard h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .microcard label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .microcard input[type="text"],
+        .microcard input[type="password"],
+        .microcard input[type="file"],
+        .microcard textarea {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .microcard textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .microcard button {
+            background-color: #1877f2; /* Consistent button color */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .microcard button:hover {
+            background-color: #166fe5;
+        }
+        /* Flash messages styling */
+        .flashes {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .flashes li {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .flashes .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flashes .danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .flashes .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .flashes .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
 </head>
 
 <body>
     <div class="navbar">
-        <button onclick="sampleRedirect">Main Feed</button> <!-- # is where a link would go!! -->
-        <button onclick="sampleRedirect">Search</button>
-        <button onclick="sampleRedirect">Upload</button>
-        <button onclick="sampleRedirect" class="right">My Profile</button>
-  </div>
+        <a href="{{ url_for('main_feed') }}"><button>Main Feed</button></a>
+        <a href="{{ url_for('search') }}"><button>Search</button></a>
+        <a href="{{ url_for('upload') }}"><button>Upload</button></a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('profile', username=current_user.username) }}" class="right"><button>My Profile</button></a>
+        {% else %}
+            <a href="{{ url_for('login_view') }}" class="right"><button>Login</button></a>
+        {% endif %}
+    </div>
 
 <div class="bg">
     <div class="card">
-        <h1>Change Your UserName: </h1>
-        <div class="microcard">
-            <p></p>
-            <form method="post"> 
-                <label for="fname"> Create a new identity, but no pressure! </label>
-                <br/>
-                <input id = "fname" name = "fname" type = "text" />
-                <br/> <br/>
-                <button>Upload New User Name</button>
-                <p></p>
-            </form>
-        </div>
-        <br/><br/>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <h1>Edit Your Profile</h1>
         
-
-        <h1>Change Your Password: </h1>
-        <div class="microcard">
-            <p></p>
-            <form method="post"> 
-                <label for="password"> I won't tell anyone!! </label>
-                <br/>
-                <input id = "password" name = "password" type = "text" />
-                <br/> <br/>
-                <button>Create New Password</button>
-            </form>
-            <p></p>
-        </div>
-        <br/><br/>
-
-        <p>{display users pfp here}</p>
-        <h1>Change Profile Picture:</h1>
-        <!-- upload/post a file -->
-        <div class="microcard">
-            <p></p>
-            <form method="post" enctype="multipart/form-data"> <!-- enctype multipart lets us actually send a file instead of just file name -->
-                <label for="file">Select Your Image: </label>
-                <br/>
-                <input id = "file" name = "pfpUpload" type = "file" />
-                <br/> <br/>
-                <button>Upload Profile Picture</button>
-            </form>
-            <p></p>
+        <form method="post" enctype="multipart/form-data">
+            <div class="microcard">
+                <h2>Account Information</h2>
+                <label for="fname">Username:</label>
+                <input id="fname" name="fname" type="text" value="{{ user.username }}">
+                
+                <label for="password">New Password (leave blank to keep current):</label>
+                <input id="password" name="password" type="password" placeholder="Enter new password">
             </div>
 
-        <br/> <br/>
-        <!--  -->
-
-        <!-- BIO TIME -->
-        <p>{display users bio here}</p>
-        <h1>Change Your Bio: (256 character limit)</h1>
-        <div class="microcard">
-            <p></p>
-            <form method="post"> 
-                <label for="bio">Type Away! </label>
-                <br/>
-                <textarea id="bio" name="bio" rows="4" cols="50"></textarea>
-                <br/> <br/>
-                <button>Upload New Bio</button>
-            </form>
-            <p></p>
+            <div class="microcard">
+                <h2>Profile Details</h2>
+                <label for="bio">Bio (256 character limit):</label>
+                <textarea id="bio" name="bio" rows="4" maxlength="256">{{ user.bio or '' }}</textarea>
+                
+                <label for="pfpUpload">Profile Picture:</label>
+                {% if user.pfp %}
+                    <img src="{{ url_for('static', filename='uploads/' + user.pfp) }}" alt="Current PFP" style="max-width: 150px; border-radius: 8px; margin-bottom: 10px; display:block;">
+                {% endif %}
+                <input id="pfpUpload" name="pfpUpload" type="file" accept="image/*">
             </div>
-            <br/> <br/>
+            
+            <button type="submit">Save Changes</button>
+        </form>
     </div>
 </div>
 </body>
