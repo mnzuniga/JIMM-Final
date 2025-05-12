@@ -1,5 +1,24 @@
+/* body {
+  background: linear-gradient(-45deg, #367c50 , #549a8d, #5ab9a2, #d2ec99, #ffedd7);
+  background-size: 400% 400%;
+  animation: gradient 5s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+      background-position: 0% 50%;
+  }
+  50% {
+      background-position: 100% 50%;
+  }
+  100% {
+      background-position: 0% 50%;
+  }
+} */
+/* the above is code to add a cool gradient  background to our page, i think its cool -jav */
+
 .bg {
-    /* height: 100vh; */
+    min-height: 100vh;
     background: #5ab9a2;
     display: flex;
     align-items: center;
@@ -18,7 +37,6 @@
     
   }
   
-
   .microcard {
     margin-right: 10px;
     width: 70%;
@@ -34,7 +52,6 @@
     font-family: monospace;
     color: #3b132b;
   }
-
   p, label, form, button, input {
     font-family: monospace;
     color: #8b3a49;
@@ -47,7 +64,6 @@
     box-sizing: border-box;
   }
 
-
   .navbar {
     position: sticky;
     top: 0;
@@ -57,7 +73,7 @@
 
   .navbar button {
     float: left;
-    display: block;
+    /* display: block; */
     background-color: #367c50;
     color: white;
     text-align: center;

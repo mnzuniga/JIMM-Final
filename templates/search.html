@@ -4,15 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Search Users</title>
+    <link rel="stylesheet" href="../static/styles/1main.css">
     <link rel="stylesheet" href="../static/styles/search.css">
 </head>
 <body>
-    <div class="search-container">
-        <h2>🔍 Search for Users</h2>
-        <form action="{{ url_for('search') }}" method="GET">
-            <input type="text" name="query" placeholder="Enter username..." required>
-            <button type="submit">Search</button>
-        </form>
+    <div class="navbar">
+        <button onclick="Redirect">Search</button>
+        <button onclick="Redirect">Upload</button>
+        <button onclick="Redirect">Main Feed</button> <!-- # is where a link would go!! -->
+        <button onclick="Redirect" class="right">Sign Out</button>
+        <button onclick="Redirect" class="right">My Profile</button>      
+  </div>
+
+    <div class=bg>
+        <div class="card">
+            <h2>🔍 Search for Users</h2>
+            <form action="{{ url_for('search') }}" method="GET">
+                <input type="text" name="query" placeholder="Enter username..." required>
+                <button type="submit">Search</button>
+            </form>
+        
 
         {% if results is not none %}
             <div class="results">
@@ -27,7 +38,9 @@
                     <p>No users found.</p>
                 {% endif %}
             </div>
+            
         {% endif %}
+    </div>
     </div>
 </body>
 </html>
