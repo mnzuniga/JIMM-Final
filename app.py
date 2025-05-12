@@ -222,9 +222,9 @@ def create_app():
     def polls():
         poll = Poll.query.order_by(Poll.start_date.desc()).first()
         
-        if not poll:
-            flash('No polls available at the moment.', 'info')
-            return redirect(url_for('main_feed'))
+        # if not poll:
+        #     flash('No polls available at the moment.', 'info')
+        #     return redirect(url_for('main_feed'))
 
         user_vote = Interaction.query.filter_by(
             user_id=current_user.id,

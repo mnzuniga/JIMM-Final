@@ -165,7 +165,7 @@
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('profile', username=current_user.username) }}" class="right"><button>My Profile</button></a>
             <a href="{{ url_for('logout_view') }}" class="right"><button>Logout</button></a>
-            <a href="{{ url_for('polls') }}" class="right"><button>Polls</button></a>
+            <!-- <a href="{{ url_for('polls') }}" class="right"><button>Polls</button></a> -->
             
         {% else %}
             <a href="{{ url_for('login_view') }}" class="right"><button>Login</button></a>
