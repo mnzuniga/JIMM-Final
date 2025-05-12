@@ -1,0 +1,35 @@
+<div class="navbar">
+
+    <!-- Main Feed (Flask route) -->
+    <form action="{{ url_for('main_feed') }}" method="get" style="display:inline;">
+      <button type="submit">Main Feed</button>
+    </form>
+  
+    <!-- Search Modal trigger -->
+    <button id="openSearchModalBtn">Search</button>
+  
+    {% if current_user.is_authenticated %}
+      <!-- My Profile (Flask route with username) -->
+      <form action="{{ url_for('profile', username=current_user.username) }}" method="get" style="display:inline;">
+        <button type="submit">My Profile</button>
+      </form>
+  
+      <!-- 🔁 Polls: redirect to static polls_static.html instead of /polls route -->
+      <a href="{{ url_for('static', filename='polls_static.html') }}" style="display:inline;">
+        <button type="button">Polls</button>
+      </a>
+  
+      <!-- Logout -->
+      <form action="{{ url_for('logout_view') }}" method="get" style="display:inline;">
+        <button type="submit">Logout</button>
+      </form>
+  
+    {% else %}
+      <!-- Login -->
+      <form action="{{ url_for('login_view') }}" method="get" style="display:inline;">
+        <button type="submit">Login</button>
+      </form>
+    {% endif %}
+  
+  </div>
+  

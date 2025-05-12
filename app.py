@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
 import uuid # For unique filenames
-
+ 
 # Configure the login_manager instance imported from extensions
 # This is typically done after init_app, but can be set here if login_manager is already an instance.
 # However, best practice is often within create_app or an extensions setup function.
@@ -419,7 +419,5 @@ if __name__ == '__main__':
                 )
                 db.session.add(admin_user)
                 db.session.commit()
-
-    app.run(debug=True, port=5001)
 
     app.run(debug=True, port=5001)
