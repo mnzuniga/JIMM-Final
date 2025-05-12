@@ -18,7 +18,7 @@
         class="cover"
       />
       <img
-        src="https://images.pexels.com/photos/14028501/pexels-photo-14028501.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
+        src="{% if user.pfp %}{{ url_for('static', filename='uploads/' ~ user.pfp) }}{% else %}https://images.pexels.com/photos/14028501/pexels-photo-14028501.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load{% endif %}"
         alt="profile"
         class="profilePic"
       />
@@ -27,40 +27,130 @@
     <div class="profileContainer">
       <div class="uInfo">
         <div class="left">
-          <a href="http://facebook.com"><span class="material-icons">facebook</span></a>
-          <a href="http://instagram.com"><span class="material-icons">instagram</span></a>
-          <a href="http://twitter.com"><span class="material-icons">twitter</span></a>
-          <a href="http://linkedin.com"><span class="material-icons">linkedin</span></a>
-          <a href="http://pinterest.com"><span class="material-icons">pinterest</span></a>
+          <!-- Social links could go here -->
         </div>
-
         <div class="center">
-          <span>Jane Doe</span>
+          <span>{{ user.username }}</span>
           <div class="info">
             <div class="item">
-              <span class="material-icons">place</span>
-              <span>USA</span>
-            </div>
-            <div class="item">
-              <span class="material-icons">language</span>
-              <span>lama.dev</span>
+              <span class="material-icons">badge</span>
+              <span>{% if user.is_admin %}Admin{% else %}User{% endif %}</span>
             </div>
           </div>
-          <button>Follow</button>
+          {% if user.bio %}
+            <div style="margin-top:10px; color:#666;">{{ user.bio }}</div>
+          {% endif %}
         </div>
-
         <div class="right">
-          <span class="material-icons">email</span>
-          <span class="material-icons">more_vert</span>
+          <!-- Add more icons or actions here if needed -->
         </div>
       </div>
 
-      <!-- Posts section placeholder -->
       <div class="posts">
-        <!-- Insert post cards or content here -->
-        <p>[Posts will go here]</p>
+        <h2 style="margin-bottom: 10px;">Posts</h2>
+        {% if posts %}
+          <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            {% for post in posts %}
+              <div style="background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 220px; padding: 12px;">
+                {% if post.image %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ post.image) }}" alt="Post image" style="width:100%; border-radius:8px; margin-bottom: 8px;" />
+                {% endif %}
+                {% if post.tags %}
+                  <div style="font-size:0.85em; color:#4c2242; margin-bottom:4px;">Tags: {{ post.tags }}</div>
+                {% endif %}
+                {% if post.link %}
+                  <div style="margin-bottom:4px;"><a href="{{ post.link }}" target="_blank" style="color:#367c50; text-decoration:underline;">Related Link</a></div>
+                {% endif %}
+                <div style="font-size: 1em; margin-bottom: 6px; color:#333;">{{ post.text }}</div>
+                <div style="font-size: 0.85em; color: #888;">{{ post.date_time.strftime('%b %d, %Y') if post.date_time else '' }}</div>
+                <!-- Comments section -->
+                <div class="comments" style="margin-top:8px;">
+                  <strong>Comments:</strong>
+                  <ul style="padding-left:18px;">
+                    {% for comment in post.interactions if comment.interaction_type == 'comment' %}
+                      <li style="font-size:0.95em; color:#444;">{{ comment.extra_info }}</li>
+                    {% endfor %}
+                  </ul>
+                  <form class="comment-form" data-post-id="{{ post.id }}" style="margin-top:4px;">
+                    <input type="text" name="comment" placeholder="Add a comment..." style="width:70%; padding:2px 6px;">
+                    <button type="submit" style="padding:2px 10px;">Post</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color:#888;">No posts yet.</p>
+        {% endif %}
       </div>
     </div>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.like-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const postId = btn.getAttribute('data-post-id');
+                fetch(`/api/posts/${postId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success !== false) {
+                        const likeCountSpan = document.getElementById(`like-count-${postId}`);
+                        if (likeCountSpan) {
+                            likeCountSpan.textContent = data.like_count;
+                        }
+                        btn.childNodes[0].textContent = data.liked ? '❤️ Like (' : '🤍 Like (';
+                    } else {
+                        alert(data.message || 'Error processing like.');
+                    }
+                })
+                .catch(() => {
+                    alert('Network error. Please try again.');
+                });
+            });
+        });
+        // AJAX comment submission
+        document.querySelectorAll('.comment-form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const postId = form.getAttribute('data-post-id');
+                const input = form.querySelector('input[name="comment"]');
+                const comment = input.value.trim();
+                if (!comment) return;
+                fetch(`/api/posts/${postId}/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ comment })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const ul = form.parentElement.querySelector('ul');
+                        const li = document.createElement('li');
+                        li.textContent = comment;
+                        li.style.fontSize = '0.95em';
+                        li.style.color = '#444';
+                        ul.appendChild(li);
+                        input.value = '';
+                    } else {
+                        alert(data.error || 'Error posting comment.');
+                    }
+                })
+                .catch(() => {
+                    alert('Network error. Please try again.');
+                });
+            });
+        });
+    });
+    </script>
 </body>
 </html>

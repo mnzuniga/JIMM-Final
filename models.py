@@ -58,6 +58,7 @@ class Post(db.Model):
     image = db.Column(db.String(256))
     text = db.Column(db.Text)
     date_time = db.Column(db.DateTime, default=datetime)
-
+    tags = db.Column(db.String(256))  # Comma-separated tags
+    link = db.Column(db.String(512))  # Optional related link
     interactions = db.relationship('Interaction', back_populates='post')
     authors = db.relationship('User', secondary='user_posts', back_populates='posts')

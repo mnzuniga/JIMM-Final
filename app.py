@@ -77,7 +77,6 @@ def create_app():
         if request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')
-            name = request.form.get('name', username) # Default name to username
 
             if not username or not password:
                 flash('Username and password are required.', 'warning')
@@ -88,7 +87,7 @@ def create_app():
             if User.query.filter_by(username=username).first():
                 flash('Username already taken', 'warning')
             else:
-                user = User(username=username, password=hash_password(password), name=name)
+                user = User(username=username, password=hash_password(password))
                 db.session.add(user)
                 db.session.commit()
                 flash('Account created! Please login.', 'success')
@@ -155,7 +154,8 @@ def create_app():
         user = User.query.filter_by(username=username).first_or_404()
         page = request.args.get('page', 1, type=int)
         per_page = app.config.get('POSTS_PER_PROFILE_PAGE', 9)
-        pagination = Post.query.with_parent(user, 'authors').order_by(Post.date_time.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        # FIX: Use Post.authors (not string) for with_parent
+        pagination = Post.query.with_parent(user, Post.authors).order_by(Post.date_time.desc()).paginate(page=page, per_page=per_page, error_out=False)
         posts_on_page = pagination.items
         return render_template('profile.html', user=user, posts=posts_on_page, pagination=pagination)
 
@@ -165,6 +165,8 @@ def create_app():
         if request.method == 'POST':
             file = request.files.get('photo')
             text = request.form.get('description', '')
+            tags = request.form.get('tags', '')
+            link = request.form.get('link', '')
 
             if not file or not file.filename:
                 flash('Please select an image file to upload.', 'warning')
@@ -184,7 +186,7 @@ def create_app():
                 flash('Failed to save image due to a server error.', 'danger')
                 return redirect(request.url)
 
-            post = Post(image=unique_filename, text=text, date_time=datetime.utcnow())
+            post = Post(image=unique_filename, text=text, date_time=datetime.utcnow(), tags=tags, link=link)
             post.authors.append(current_user)
             db.session.add(post)
             db.session.commit()
