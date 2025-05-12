@@ -9,4 +9,4 @@ class Config:
         or 'sqlite:///' + os.path.join(basedir, 'petsocial.db')
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
+    UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads') 

@@ -1,6 +1,10 @@
 from flask_login import UserMixin
 from database import db
 from datetime import datetime
+from database import db
+
+user_posts = db.Table('user_posts', db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),db.Column('post_id', db.Integer, db.ForeignKey('posts.id'), primary_key=True))
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -31,7 +35,7 @@ class Poll(db.Model):
     question = db.Column(db.String(256), nullable=False)
     option1 = db.Column(db.String(128), nullable=False)
     option2 = db.Column(db.String(128), nullable=False)
-    start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    start_date = db.Column(db.DateTime, default=datetime.utcnow())
 
     interactions = db.relationship('Interaction', back_populates='poll')
 
