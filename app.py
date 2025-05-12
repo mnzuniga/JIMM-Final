@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from config import Config
 from database import init_app as db_init, db
-from extensions import login_manager, admin
+from extensions import login_manager, admin, SecureModelView
 from models import User, Post, Poll, Interaction, Follow
 from flask_admin.contrib.sqla import ModelView
 from utils import hash_password, verify_password, allowed_file
@@ -17,6 +17,11 @@ login_manager.login_view = 'login_view'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# start of flask admin stuff
+class PollAdmin(SecureModelView):
+    form_excluded_columns = ('interactions', 'start_date')
+# end of admin stuff
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -25,12 +30,7 @@ def create_app():
     login_manager.init_app(app)
     admin.init_app(app)
 
-    # Admin views
-    admin.add_view(ModelView(User, db.session))
-    admin.add_view(ModelView(Post, db.session))
-    admin.add_view(ModelView(Poll, db.session))
-    admin.add_view(ModelView(Interaction, db.session))
-    admin.add_view(ModelView(Follow, db.session))
+    admin.add_view(PollAdmin(Poll, db.session, name='Polls'))
 
     # Login route
     @app.route('/', methods=['GET', 'POST'])
@@ -43,10 +43,12 @@ def create_app():
             user = User.query.filter_by(username=username).first()
             if user and verify_password(user.password, password):
                 login_user(user)
+                if user.is_admin:
+                    return redirect(url_for('admin.index'))
                 return redirect(url_for('main_feed'))
-            flash('Invalid credentials', '!!!')
             # end
-            return f"Login attempted for: {username}"
+            # return f"Login attempted for: {username}"
+        flash('Invalid...', 'error')
         return render_template('login.html')
 
     # Register route
@@ -55,20 +57,21 @@ def create_app():
         if request.method == 'POST':
             username = request.form['username']
             password = request.form['password']
-            name = request.form['name']
+            question = request.form['question']
+            answer = request.form['answer']
             if User.query.filter_by(username=username).first():
                 flash('Username already taken', 'warning')
-            else:
-                user = User(username=username,password=hash_password(password),   )
-                db.session.add(user)
-                db.session.commit()
-                flash('Account created!', 'success')
-                return redirect(url_for('login'))
-            return f"Registered user: {username} ({email})"
+                return redirect(url_for('register_view'))
+            
+            user = User(username=username,password=hash_password(password), pfp = None, bio='', security_question = question, security_answer = answer, is_admin = False)
+            db.session.add(user)
+            db.session.commit()
+            flash('Account created!', 'success')
+            return redirect(url_for('login_view'))
         return render_template('register.html')
     
+    
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True) # for images
-
     @app.route('/feed')
     @login_required
     def main_feed():
