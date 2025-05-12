@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/register.css') }}">
+  <link rel="stylesheet" href="../static/styles/register.css">
 </head>
 <body>
   <div class="register">
@@ -24,6 +24,8 @@
           <input type="email" name="email" placeholder="Email" required />
           <input type="password" name="password" placeholder="Password" required />
           <input type="text" name="name" placeholder="Full Name" required />
+          <input type="text" name="question" placeholder="Create a Security Question" required />
+          <input type="text" name="answer" placeholder="Answer your Security Question" required />
           <button type="submit">Register</button>
         </form>
       </div>
