@@ -4,9 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Search Users</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/1main.css') }}">
     <link rel="stylesheet" href="../static/styles/search.css">
+    <style>
+        body {
+            padding-top: 70px; /* Adjust for navbar */
+        }
+    </style>
 </head>
 <body>
+    <div class="navbar">
+        <a href="{{ url_for('main_feed') }}"><button>Main Feed</button></a>
+        <a href="{{ url_for('search') }}"><button>Search</button></a>
+        <a href="{{ url_for('upload') }}"><button>Upload</button></a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('profile', username=current_user.username) }}" class="right"><button>My Profile</button></a>
+        {% else %}
+            <a href="{{ url_for('login_view') }}" class="right"><button>Login</button></a>
+        {% endif %}
+    </div>
+
     <div class="search-container">
         <h2>🔍 Search for Users</h2>
         <form action="{{ url_for('search') }}" method="GET">

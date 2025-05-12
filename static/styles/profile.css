@@ -7,7 +7,7 @@ body {
 }
 
 .profile {
-    max-width: 900px;
+    max-width: 1100px; /* Increased max-width for desktop */
     margin: 20px auto;
     background-color: #fff;
     border-radius: 8px;
@@ -17,7 +17,7 @@ body {
 
 .images {
     position: relative; /* For positioning profilePic */
-    height: 250px; /* Adjust as needed */
+    height: 300px; /* Increased height for cover photo */
 }
 
 .cover {
@@ -40,7 +40,7 @@ body {
 }
 
 .profileContainer {
-    padding: 90px 20px 20px; /* Top padding to clear profilePic */
+    padding: 90px 30px 30px; /* Adjusted padding */
     text-align: center;
 }
 
@@ -172,8 +172,8 @@ body {
 }
 
 .posts div[style*="background: #fff"] { /* Targeting post item */
-    width: calc(33.333% - 20px); /* Adjust for 3 posts per row, considering gap */
-    min-width: 200px; /* Minimum width for smaller screens */
+    width: calc(33.333% - 26px); /* Adjusted for 3 posts per row, considering gap and increased padding */
+    min-width: 220px; /* Minimum width for smaller screens */
     margin-bottom: 20px; /* Add space between rows */
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     transition: box-shadow .3s cubic-bezier(.25,.8,.25,1);
@@ -229,6 +229,21 @@ body {
 }
 
 /* Responsive adjustments */
+@media (max-width: 1200px) { /* Adjust breakpoint if needed */
+    .profile {
+        max-width: 900px; /* Revert to a smaller max-width on smaller screens */
+    }
+}
+
+@media (max-width: 992px) { /* Adjusted breakpoint for better transition */
+    .profile {
+        max-width: 700px;
+    }
+    .posts div[style*="background: #fff"] { /* Post item */
+        width: calc(50% - 10px); /* 2 posts per row */
+    }
+}
+
 @media (max-width: 768px) {
     .profilePic {
         width: 120px;
@@ -236,25 +251,26 @@ body {
         bottom: -60px;
         border-width: 3px;
     }
+    .images {
+        height: 200px; /* Adjust cover photo height for smaller screens */
+    }
     .profileContainer {
         padding-top: 70px;
+        padding-left: 15px;
+        padding-right: 15px;
     }
     .posts div[style*="background: #fff"] { /* Post item */
-        width: calc(50% - 10px); /* 2 posts per row */
+        width: calc(50% - 15px); /* 2 posts per row, adjusted gap */
     }
 }
 
-@media (max-width: 480px) {
-    .profileContainer {
-        padding: 10px;
-    }
-    .uInfo {
-        flex-direction: column;
-        height: 30vh;
-        padding: 20px;
-        margin-top: 100px;
-    }
+@media (max-width: 576px) { /* Changed from 480px for earlier switch to 1 column */
     .posts div[style*="background: #fff"] { /* Post item */
         width: 100%; /* 1 post per row */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .uInfo .center span {
+        font-size: 1.5em;
     }
 }
