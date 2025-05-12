@@ -1,0 +1,73 @@
+.bg {
+    /* height: 100vh; */
+    background: #5ab9a2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .card {
+    width: 50%;
+    /* display: flex; */
+    background-color: #f6a8b3;
+    border-radius: 10px;
+    min-height: 600px;
+    overflow: hidden;
+    /* align-items: center; */
+    justify-content: center;
+    
+  }
+  
+
+  .microcard {
+    margin-right: 10px;
+    width: 70%;
+    background-color: #fbc697;
+    border-radius: 10px;
+    overflow: hidden;
+    align-items: center;
+    margin: auto;
+  }
+
+
+  h1  {
+    font-family: monospace;
+    color: #3b132b;
+  }
+
+  p, label, form, button, input {
+    font-family: monospace;
+    color: #8b3a49;
+  }
+
+  input[type=text] {
+    width: 90%;
+    padding: 10px 10px;
+    margin: 8px 0;
+    box-sizing: border-box;
+  }
+
+
+  .navbar {
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+    background-color: #367c50;
+  }
+
+  .navbar button {
+    float: left;
+    display: block;
+    background-color: #367c50;
+    color: white;
+    text-align: center;
+    padding: 14px 50px;
+  }
+  /* Right-aligned link */
+  .navbar button.right {
+    float: right;
+  }
+  .navbar button:hover {
+    background-color: #ddd;
+    color: black;
+  }

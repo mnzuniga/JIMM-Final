@@ -1,1 +1,85 @@
 <!-- page to edit your username, pfp, and bio -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="../static/styles/1main.css">
+</head>
+
+<body>
+    <div class="navbar">
+        <button onclick="sampleRedirect">Main Feed</button> <!-- # is where a link would go!! -->
+        <button onclick="sampleRedirect">Search</button>
+        <button onclick="sampleRedirect">Upload</button>
+        <button onclick="sampleRedirect" class="right">My Profile</button>
+  </div>
+
+<div class="bg">
+    <div class="card">
+        <h1>Change Your UserName: </h1>
+        <div class="microcard">
+            <p></p>
+            <form method="post"> 
+                <label for="fname"> Create a new identity, but no pressure! </label>
+                <br/>
+                <input id = "fname" name = "fname" type = "text" />
+                <br/> <br/>
+                <button>Upload New User Name</button>
+                <p></p>
+            </form>
+        </div>
+        <br/><br/>
+        
+
+        <h1>Change Your Password: </h1>
+        <div class="microcard">
+            <p></p>
+            <form method="post"> 
+                <label for="password"> I won't tell anyone!! </label>
+                <br/>
+                <input id = "password" name = "password" type = "text" />
+                <br/> <br/>
+                <button>Create New Password</button>
+            </form>
+            <p></p>
+        </div>
+        <br/><br/>
+
+        <p>{display users pfp here}</p>
+        <h1>Change Profile Picture:</h1>
+        <!-- upload/post a file -->
+        <div class="microcard">
+            <p></p>
+            <form method="post" enctype="multipart/form-data"> <!-- enctype multipart lets us actually send a file instead of just file name -->
+                <label for="file">Select Your Image: </label>
+                <br/>
+                <input id = "file" name = "pfpUpload" type = "file" />
+                <br/> <br/>
+                <button>Upload Profile Picture</button>
+            </form>
+            <p></p>
+            </div>
+
+        <br/> <br/>
+        <!--  -->
+
+        <!-- BIO TIME -->
+        <p>{display users bio here}</p>
+        <h1>Change Your Bio: (256 character limit)</h1>
+        <div class="microcard">
+            <p></p>
+            <form method="post"> 
+                <label for="bio">Type Away! </label>
+                <br/>
+                <textarea id="bio" name="bio" rows="4" cols="50"></textarea>
+                <br/> <br/>
+                <button>Upload New Bio</button>
+            </form>
+            <p></p>
+            </div>
+            <br/> <br/>
+    </div>
+</div>
+</body>
+</html>
