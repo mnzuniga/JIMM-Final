@@ -339,6 +339,22 @@ def create_app():
         db.session.commit()
         return {'success': True}
 
+    @app.route('/api/search/users', methods=['GET'])
+    @login_required
+    def api_search_users():
+        query = request.args.get('query', '').strip()
+        users_data = []
+        if query:
+            # Limit results for a modal display, can add pagination later if complex
+            users = User.query.filter(User.username.ilike(f'%{query}%')).limit(10).all()
+            for user in users:
+                users_data.append({
+                    'username': user.username,
+                    'pfp': url_for('static', filename='uploads/' + user.pfp) if user.pfp else url_for('static', filename='images/default_pfp.png'), # Assuming a default pfp
+                    'profile_url': url_for('profile', username=user.username)
+                })
+        return {'results': users_data}
+
     # IMPORTANT SECURITY NOTE: CSRF Protection
     # This application appears to use raw HTML forms (`request.form`) without Flask-WTF or
     # a similar CSRF protection mechanism. This makes POST endpoints vulnerable to

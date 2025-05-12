@@ -112,19 +112,74 @@
         .modal-content button[type="submit"]:hover {
             background-color: #166fe5;
         }
+
+        /* Search Modal Specific Styles */
+        #searchModal .modal-content {
+            padding: 20px;
+        }
+        #searchModal input[type="search"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1.1em;
+        }
+        #searchResults {
+            max-height: 400px; /* Or any appropriate height */
+            overflow-y: auto;
+        }
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-decoration: none;
+            color: #333;
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        .search-result-item:hover {
+            background-color: #f9f9f9;
+        }
+        .search-result-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        .search-result-item span {
+            font-size: 1em;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <div class="navbar">
         <a href="{{ url_for('main_feed') }}"><button>Main Feed</button></a>
-        <a href="{{ url_for('search') }}"><button>Search</button></a>
+        <button id="openSearchModalBtn">Search</button> <!-- Changed to button to trigger modal -->
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('profile', username=current_user.username) }}" class="right"><button>My Profile</button></a>
             <a href="{{ url_for('logout_view') }}" class="right"><button>Logout</button></a>
         {% else %}
             <a href="{{ url_for('login_view') }}" class="right"><button>Login</button></a>
         {% endif %}
+    </div>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button search-close-button">&times;</span>
+            <h2>Search Users</h2>
+            <input type="search" id="searchInput" placeholder="Enter username...">
+            <div id="searchResults">
+                <!-- Search results will be populated here by JavaScript -->
+            </div>
+        </div>
     </div>
 
     <!-- Upload Modal -->
@@ -231,30 +286,98 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Modal Get elements
-        var modal = document.getElementById("uploadModal");
+        // Upload Modal Get elements
+        var uploadModal = document.getElementById("uploadModal");
         var fab = document.getElementById("openUploadModalFab");
-        var closeButton = document.querySelector(".modal-content .close-button");
+        var uploadCloseButton = document.querySelector("#uploadModal .close-button");
 
-        // Open modal when FAB is clicked
+        // Search Modal Get elements
+        var searchModal = document.getElementById("searchModal");
+        var openSearchBtn = document.getElementById("openSearchModalBtn");
+        var searchCloseButton = document.querySelector("#searchModal .search-close-button");
+        var searchInput = document.getElementById("searchInput");
+        var searchResultsContainer = document.getElementById("searchResults");
+
+        // Open Upload Modal when FAB is clicked
         if (fab) {
             fab.onclick = function() {
-                modal.style.display = "block";
+                uploadModal.style.display = "block";
             }
         }
 
-        // Close modal when close button is clicked
-        if (closeButton) {
-            closeButton.onclick = function() {
-                modal.style.display = "none";
+        // Close Upload Modal when close button is clicked
+        if (uploadCloseButton) {
+            uploadCloseButton.onclick = function() {
+                uploadModal.style.display = "none";
             }
         }
 
-        // Close modal when clicking outside of the modal content
+        // Open Search Modal when Search button is clicked
+        if (openSearchBtn) {
+            openSearchBtn.onclick = function() {
+                searchModal.style.display = "block";
+                searchInput.focus(); // Auto-focus on the search input
+            }
+        }
+
+        // Close Search Modal when close button is clicked
+        if (searchCloseButton) {
+            searchCloseButton.onclick = function() {
+                searchModal.style.display = "none";
+                searchInput.value = ''; // Clear search input
+                searchResultsContainer.innerHTML = ''; // Clear results
+            }
+        }
+
+        // Close modals when clicking outside of the modal content
         window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
+            if (event.target == uploadModal) {
+                uploadModal.style.display = "none";
             }
+            if (event.target == searchModal) {
+                searchModal.style.display = "none";
+                searchInput.value = ''; 
+                searchResultsContainer.innerHTML = '';
+            }
+        }
+
+        // AJAX for User Search
+        let searchTimeout = null;
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = searchInput.value.trim();
+                searchResultsContainer.innerHTML = ''; // Clear previous results immediately
+
+                if (query.length < 2) { // Optional: only search if query is at least 2 chars
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    fetch(`/api/search/users?query=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.results && data.results.length > 0) {
+                                data.results.forEach(user => {
+                                    const userElement = document.createElement('a');
+                                    userElement.href = user.profile_url;
+                                    userElement.classList.add('search-result-item');
+                                    userElement.innerHTML = `
+                                        <img src="${user.pfp}" alt="${user.username}'s pfp">
+                                        <span>${user.username}</span>
+                                    `;
+                                    searchResultsContainer.appendChild(userElement);
+                                });
+                            } else {
+                                searchResultsContainer.innerHTML = '<p style="text-align:center; color:#777;">No users found.</p>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Search error:', error);
+                            searchResultsContainer.innerHTML = '<p style="text-align:center; color:red;">Error loading results.</p>';
+                        });
+                }, 300); // Debounce: wait 300ms after user stops typing
+            });
         }
 
         document.querySelectorAll('.like-btn').forEach(function(btn) {
